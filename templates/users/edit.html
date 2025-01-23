@@ -1,0 +1,17 @@
+{% extends 'main/layout.html' %}
+
+{% block content %}
+    <h1>Редактировать пользователя</h1>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="login" class="form-label">Логин</label>
+            <input class="form-control" type="text" id="login" name="login" value="{{ user['login'] }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Пароль</label>
+            <input class="form-control" type="text" id="password" name="password" value="{{ user['password'] }}" required>
+        </div>
+        <button type="submit" class="btn btn-success">Сохранить</button>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Назад</a>
+    </form>
+{% endblock %}

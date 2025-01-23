@@ -1,0 +1,17 @@
+{% extends 'main/layout.html' %}
+
+{% block content %}
+    <h1>Редактировать тег</h1>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="name" class="form-label">Название</label>
+            <input class="form-control" type="text" id="name" name="name" value="{{ tag['name'] }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Содержимое</label>
+            <input class="form-control" type="text" id="description" name="description" value="{{ tag['description'] }}" required>
+        </div>
+        <button type="submit" class="btn btn-success">Сохранить</button>
+        <a href="{{ url_for('tag') }}" class="btn btn-secondary">Назад</a>
+    </form>
+{% endblock %}

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Заголовок по умолчанию{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/index.css') }}"> <!-- Пример подключения стилей -->
+    {% block stylesheet %} {% endblock %}
+</head>
+<body>
+    <!-- Навигационная панель -->
+    <nav>
+        <div class="topnav">
+            <a class="active navigation" href="{{ url_for('home') }}">Главная</a>
+<!--            адрес ссылки формируется динамически с помощью функции url_for.-->
+            <a class="navigation" href="{{ url_for('about') }}">О приложении</a>
+            <a class="navigation" href="{{ url_for('contact') }}">Контакты</a>
+            {% if session.get('role') == 'admin' %}
+                <a class="navigation" href="{{ url_for('get_users') }}">Пользователи</a>
+            {% endif %}
+
+            {% if session.get('role') == 'manager' %}
+                <a class="navigation" href="{{ url_for('tag') }}">Теги</a>
+            {% endif %}
+
+            {% if session.get('username') %}
+                <a class="login navigation" href="{{ url_for('account') }}">Личный кабинет</a>
+                <a class="login navigation" href="{{ url_for('logout') }}">Выйти</a>
+            {% else %}
+                <a class="login navigation" href="{{ url_for('auth') }}">Login</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Основной блок страницы -->
+    <main>
+        <div style="padding-left:16px">
+            {% block content %}
+            Этот контент будет заменён на уникальный для каждой страницы.
+            {% endblock %}
+        </div>
+    </main>
+<script src="{{ url_for('static', filename= 'js/main.js') }}"></script>
+</body>
+</html>

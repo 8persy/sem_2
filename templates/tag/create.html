@@ -1,0 +1,17 @@
+{% extends 'main/layout.html' %}
+
+{% block content %}
+    <h1>Создать новый тег</h1>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="name" class="form-label">Название тега</label>
+            <input class="form-control" type="text" id="name" name="name" required>
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Описание</label>
+            <textarea class="form-control" id="description" name="description" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-success">Сохранить</button>
+        <a href="{{ url_for('tag') }}" class="btn btn-secondary">Назад</a>
+    </form>
+{% endblock %}

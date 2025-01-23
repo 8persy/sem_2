@@ -1,0 +1,23 @@
+{% extends "main/base.html" %}
+
+{% block title %}Личный кабинет{% endblock %}
+
+{% block content %}
+<h1>Личный кабинет</h1>
+<h2>Привет, {{ session['username'] }}!</h2>
+<form method="POST">
+    <div class="container">
+        <label>
+            <input type="text" name="Login" value="{{ session['username'] }}"
+                readonly required>
+        </label>
+        <label>
+            <input type="text" placeholder="Введите имя" name="name" required>
+        </label>
+        <label>
+            <input type="text" placeholder="Введите email" name="email" required>
+        </label>
+    </div>
+    <button type="submit">Сохранить</button>
+</form>
+{% endblock %}
