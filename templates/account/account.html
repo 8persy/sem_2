@@ -8,14 +8,13 @@
 <form method="POST">
     <div class="container">
         <label>
-            <input type="text" name="Login" value="{{ session['username'] }}"
-                readonly required>
+            <input type="text" name="login" value="{{ session['username'] }}" readonly required>
         </label>
         <label>
-            <input type="text" placeholder="Введите имя" name="name" required>
+            <input type="text" placeholder="{{ name }}" name="name" required>
         </label>
         <label>
-            <input type="text" placeholder="Введите email" name="email" required>
+            <input type="text" placeholder="{{ email }}" name="email" required>
         </label>
     </div>
     <button type="submit">Сохранить</button>

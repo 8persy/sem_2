@@ -69,18 +69,37 @@ def contact():
 
 
 @app.route('/')
-def home():
-    return render_template('main/index.html')
-
-
-@app.route('/')
 def index():
     return render_template('main/index.html')
 
 
 @app.route('/account', methods=('GET', 'POST'))
 def account():
-    return render_template('account/account.html')
+    conn = get_db_connection()
+    login = session['username']
+    user = conn.execute('SELECT * FROM user_profile WHERE login = ?', (login,)).fetchone()
+
+    name = user['name']
+    email = user['email']
+
+    if not name:
+        name = 'Введите имя'
+    if not email:
+        email = 'Введите email'
+
+    if request.method == 'POST':
+        new_email = request.form.get('email')
+        new_name = request.form.get('name')
+
+        conn.execute('update user_profile set email = ?, name = ? where login = ?',
+                     (new_email, new_name, login))
+
+        conn.commit()
+        conn.close()
+
+        return redirect(url_for('index'))
+
+    return render_template('account/account.html', name=name, email=email)
 
 
 def get_db_connection():
@@ -132,7 +151,11 @@ def edit_user(login):
         new_login = request.form.get('login')
         new_password = request.form.get('password')
 
-        conn.execute('UPDATE passwords SET login = ?, password = ? WHERE login = ?', (new_login, new_password, login))
+        conn.execute('UPDATE passwords SET login = ?, password = ? WHERE login = ?',
+                     (new_login, new_password, login))
+
+        conn.execute('update user_profile SET login = ? WHERE login =?',
+                     (new_login, login))
         conn.commit()
         conn.close()
         return redirect(url_for('get_users'))
@@ -144,6 +167,7 @@ def edit_user(login):
 def delete_user(login):
     conn = get_db_connection()
     conn.execute('DELETE FROM passwords WHERE login = ?', (login,))
+    conn.execute('DELETE FROM user_profile WHERE login = ?', (login,))
     conn.commit()
     conn.close()
     flash('User has been deleted.')
