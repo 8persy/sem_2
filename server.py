@@ -11,10 +11,19 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 
+# functions
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def get_db_connection():
+    conn = sqlite3.connect('blog.db')
+    # Возвращаем строки как "словари"
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+# auth and registration
 @app.route('/authorization', methods=['GET', 'POST'])
 def auth():
     if request.method == 'POST':
@@ -71,6 +80,7 @@ def form_registration():
     return render_template('navbar/registration.html')
 
 
+# navbar
 @app.route("/about")
 def about():
     return render_template("navbar/about.html")
@@ -93,6 +103,7 @@ def index():
     return render_template('main/index.html', posts=posts_data)
 
 
+# account
 @app.route('/account', methods=('GET', 'POST'))
 def account():
     conn = get_db_connection()
@@ -122,13 +133,6 @@ def account():
     return render_template('account/account.html', name=name, email=email)
 
 
-def get_db_connection():
-    conn = sqlite3.connect('blog.db')
-    # Возвращаем строки как "словари"
-    conn.row_factory = sqlite3.Row
-    return conn
-
-
 @app.route('/logout')
 def logout():
     # Удаляем имя пользователя из сессии (выход из аккаунта)
@@ -137,6 +141,7 @@ def logout():
     return redirect(url_for('index'))
 
 
+# users
 @app.route("/users")
 def get_users():
     conn = get_db_connection()
@@ -146,7 +151,7 @@ def get_users():
 
 
 @app.route('/create', methods=('GET', 'POST'))
-def create():
+def create_user():
     if request.method == 'POST':
         login = request.form.get('login')
         password = request.form.get('password')
@@ -194,6 +199,7 @@ def delete_user(login):
     return redirect(url_for('get_users'))
 
 
+# user's posts
 @app.route('/user_posts')
 def get_user_posts():
     conn = get_db_connection()
@@ -261,24 +267,6 @@ def create_user_post():
     # return render_template('user_posts/create_user_post.html', tags=tags)
 
 
-@app.route('/tag/<string:name>/edit_tag', methods=('GET', 'POST'))
-def edit_tag(name):
-    conn = get_db_connection()
-    tag = conn.execute('SELECT * FROM tag WHERE name = ?', (name,)).fetchone()
-
-    if request.method == 'POST':
-        new_name = request.form.get('name')
-        new_description = request.form.get('description')
-
-        conn.execute('UPDATE tag SET name = ?, description = ? WHERE name = ?',
-                     (new_name, new_description, name))
-        conn.commit()
-        conn.close()
-        return redirect(url_for('tag'))
-
-    return render_template('tag/edit.html', tag=tag)
-
-
 @app.route('/user_posts/<string:post_id>/edit_post', methods=('GET', 'POST'))
 def edit_post(post_id):
     conn = get_db_connection()
@@ -321,12 +309,31 @@ def delete_post(post_id):
     return redirect(url_for('get_user_posts'))
 
 
+# tags
 @app.route('/tag')
 def tag():
     conn = get_db_connection()
     tags = conn.execute('select * from tag').fetchall()
     conn.close()
     return render_template('tag/tag.html', tags=tags)
+
+
+@app.route('/tag/<string:name>/edit_tag', methods=('GET', 'POST'))
+def edit_tag(name):
+    conn = get_db_connection()
+    tag = conn.execute('SELECT * FROM tag WHERE name = ?', (name,)).fetchone()
+
+    if request.method == 'POST':
+        new_name = request.form.get('name')
+        new_description = request.form.get('description')
+
+        conn.execute('UPDATE tag SET name = ?, description = ? WHERE name = ?',
+                     (new_name, new_description, name))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('tag'))
+
+    return render_template('tag/edit.html', tag=tag)
 
 
 @app.route('/create_tag', methods=('GET', 'POST'))
