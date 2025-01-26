@@ -1,0 +1,25 @@
+{% extends 'main/layout.html' %}
+
+{% block content %}
+    <h1>Редактировать пользователя</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="title" class="form-label">Название</label>
+            <input class="form-control" type="text" id="title" name="title" value="{{ post['title'] }}">
+        </div>
+        <div class="mb-3">
+            <label for="content" class="form-label">Содержимое</label>
+            <textarea class="form-control" id="content" id='content' name="content" required>{{ post['content'] }}</textarea>
+        </div>
+        <div class="mb-3">
+            <label for="tag" class="form-label">Тег</label>
+            <input class="form-control" type="text" id="tag" name="tag" value="{{ post['tag'] }}">
+        </div>
+        <div class="mb-3">
+            <label for="img">Изображение:</label>
+            <input type="file" id="img" name="img" value="{{ post['image_path'] }}">
+        </div>
+        <button type="submit" class="btn btn-success">Сохранить</button>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Назад</a>
+    </form>
+{% endblock %}

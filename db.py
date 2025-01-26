@@ -7,26 +7,26 @@ cursor = conn.cursor()
 # password TEXT NOT NULL);'''
 # cursor.execute(sql_create)
 
-cursor.execute('''drop table user_profile''')
-cursor.execute('''drop table passwords''')
-cursor.execute('''drop table tag''')
+# cursor.execute('''drop table user_profile''')
+# cursor.execute('''drop table passwords''')
+# cursor.execute('''drop table tag''')
 
 
 # добавление столбца
 # Убирая NOT NULL, вы позволяете столбцу role принимать значения NULL, что означает, что значение может быть "пустым" (неопределенным).
 # cursor.execute('''ALTER TABLE passwords ADD COLUMN role TEXT''')
 
-sql_create = '''CREATE TABLE tag(
-name TEXT PRIMARY KEY,
-description TEXT not null 
-);'''
-cursor.execute(sql_create)
-
-cursor.execute('''
-                CREATE TABLE IF NOT EXISTS passwords(
-                login TEXT PRIMARY KEY,
-                password TEXT NOT NULL)
-''')
+# sql_create = '''CREATE TABLE tag(
+# name TEXT PRIMARY KEY,
+# description TEXT not null
+# );'''
+# cursor.execute(sql_create)
+#
+# cursor.execute('''
+#                 CREATE TABLE IF NOT EXISTS passwords(
+#                 login TEXT PRIMARY KEY,
+#                 password TEXT NOT NULL)
+# ''')
 # cursor.execute('drop table passwords')
 # удаление столбца
 # cursor.execute('''ALTER TABLE passwords DROP COLUMN role''')
@@ -57,16 +57,27 @@ cursor.execute('''
 #             )
 #         ''')
 
-cursor.execute('''
-            CREATE TABLE user_profile (
-                user_id INTEGER PRIMARY KEY AUTOINCREMENT, -- Уникальный ID пользователя
-                name TEXT, -- Имя пользователя
-                email TEXT, -- Email пользователя
-                login TEXT, -- Логин, связанный с таблицей passwords
-                FOREIGN KEY (login) REFERENCES passwords(login) ON DELETE CASCADE ON UPDATE CASCADE
-)
-''')
-cursor.execute('''ALTER TABLE user_profile add COLUMN role text default 'user' ''')
+# cursor.execute('''
+#             CREATE TABLE user_profile (
+#                 user_id INTEGER PRIMARY KEY AUTOINCREMENT, -- Уникальный ID пользователя
+#                 name TEXT, -- Имя пользователя
+#                 email TEXT, -- Email пользователя
+#                 login TEXT, -- Логин, связанный с таблицей passwords
+#                 FOREIGN KEY (login) REFERENCES passwords(login) ON DELETE CASCADE ON UPDATE CASCADE
+# )
+# ''')
+# cursor.execute('''ALTER TABLE user_profile add COLUMN role text default 'user' ''')
+
+# cursor.execute('''
+#                     CREATE TABLE IF NOT EXISTS posts (
+#                     post_id INTEGER PRIMARY key AUTOINCREMENT,
+#                     user_id INTEGER,
+#                     title text not null,
+#                     content text not null,
+#                     image_path text,
+#                     tags text,
+#                     foreign key (user_id) references user_profile (user_id) on delete cascade)
+# ''')
 
 conn.commit()
 conn.close()

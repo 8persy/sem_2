@@ -16,6 +16,7 @@
         <option value="$MODULE_DIR$/templates/account" />
         <option value="$MODULE_DIR$/templates/main" />
         <option value="$MODULE_DIR$/templates/tag" />
+        <option value="$MODULE_DIR$/templates/user_posts" />
       </list>
     </option>
   </component>

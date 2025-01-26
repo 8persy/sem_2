@@ -1,9 +1,18 @@
 import os
 from flask import Flask, request, render_template, redirect, url_for, session, flash
 import sqlite3
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
+
+UPLOAD_FOLDER = 'static/uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @app.route('/authorization', methods=['GET', 'POST'])
@@ -28,8 +37,12 @@ def auth():
         cursor_db.execute('SELECT role FROM user_profile WHERE login = ?', (login,))
         role = cursor_db.fetchone()[0]
 
+        cursor_db.execute('SELECT user_id FROM user_profile WHERE login = ?', (login,))
+        user_id = cursor_db.fetchone()[0]
+
         session['username'] = login
         session['role'] = role
+        session['user_id'] = user_id
 
         db_lp.close()
 
@@ -70,7 +83,14 @@ def contact():
 
 @app.route('/')
 def index():
-    return render_template('main/index.html')
+    conn = get_db_connection()
+    posts_data = conn.execute('''
+                    SELECT posts.post_id, title, content, image_path, user_profile.login
+                    FROM posts
+                    INNER JOIN user_profile ON posts.user_id = user_profile.user_id
+                ''').fetchall()
+    conn.close()
+    return render_template('main/index.html', posts=posts_data)
 
 
 @app.route('/account', methods=('GET', 'POST'))
@@ -174,6 +194,73 @@ def delete_user(login):
     return redirect(url_for('get_users'))
 
 
+@app.route('/user_posts')
+def get_user_posts():
+    conn = get_db_connection()
+
+    posts_data = conn.execute('''
+    select posts.post_id, title, content, image_path, user_profile.name
+    from posts
+    inner join user_profile on posts.user_id = user_profile.user_id
+    where user_profile.login = ?''',
+                              (session['username'], )).fetchall()
+
+    conn.close()
+    return render_template('user_posts/user_posts.html', posts=posts_data)
+
+
+@app.route('/create_user_post', methods=('GET', 'POST'))
+def create_user_post():
+    # conn = sqlite3.connect('blog.db')
+    # cursor = conn.cursor()
+    #
+    # # Получение списка тегов из таблицы "tags"
+    # tags = cursor.execute('SELECT tag_id, name FROM tags').fetchall()  # Возвращает список кортежей (id, name)
+    #
+    # conn.close()
+
+    if request.method == 'POST':
+        # Получение данных из формы
+        title = request.form.get('title')
+        content = request.form.get('content')
+        # ID тега из выпадающего списка
+        tag = request.form.get('tag')
+        user_id = session['user_id']
+        file = request.files.get('image')  # Получение загружаемого файла
+
+        image_path = None
+        if file and allowed_file(file.filename):
+            safe_filename = secure_filename(file.filename)
+
+            upload_path = f'static/uploads/{safe_filename}'
+
+            file.save(upload_path)
+
+            image_path = upload_path
+
+        try:
+            conn = sqlite3.connect('blog.db')
+            cursor = conn.cursor()
+
+            cursor.execute('''
+                    INSERT INTO posts (user_id, title, content, image_path, tag)
+                    VALUES (?, ?, ?, ?, ?)''',
+                           (user_id, title, content, image_path, tag))
+
+            # Выполняем SQL-запрос: выбираем все записи из таблицы "теги"
+            # cursor.execute('SELECT * FROM tags').fetchall()
+
+            conn.commit()
+            conn.close()
+
+            flash('Пост успешно добавлен!', 'success')
+            return redirect(url_for('get_user_posts'))
+        except Exception as e:
+            flash(f'Ошибка при добавлении поста: {str(e)}', 'danger')
+    return render_template('user_posts/create_user_post.html')
+    # return render_template('user_posts/create_user_post.html', tags=tags)
+
+
 @app.route('/tag/<string:name>/edit_tag', methods=('GET', 'POST'))
 def edit_tag(name):
     conn = get_db_connection()
@@ -183,12 +270,55 @@ def edit_tag(name):
         new_name = request.form.get('name')
         new_description = request.form.get('description')
 
-        conn.execute('UPDATE tag SET name = ?, description = ? WHERE name = ?', (new_name, new_description, name))
+        conn.execute('UPDATE tag SET name = ?, description = ? WHERE name = ?',
+                     (new_name, new_description, name))
         conn.commit()
         conn.close()
         return redirect(url_for('tag'))
 
     return render_template('tag/edit.html', tag=tag)
+
+
+@app.route('/user_posts/<string:post_id>/edit_post', methods=('GET', 'POST'))
+def edit_post(post_id):
+    conn = get_db_connection()
+    post = conn.execute('select * FROM posts WHERE post_id = ?',
+                        (post_id,)).fetchone()
+
+    if request.method == 'POST':
+        new_title = request.form.get('title')
+        new_content = request.form.get('content')
+        new_tag = request.form.get('tag')
+        new_image_path = request.files.get('img')
+
+        if new_image_path and allowed_file(new_image_path.filename):
+            safe_filename = secure_filename(new_image_path.filename)
+
+            upload_path = f'static/uploads/{safe_filename}'
+
+            new_image_path = upload_path
+        else:
+            new_image_path = post['image_path']
+
+        conn.execute('UPDATE posts SET title = ?, content = ?, tag = ?, image_path = ? WHERE post_id = ?',
+                     (new_title, new_content, new_tag, new_image_path, post_id))
+        conn.commit()
+        conn.close()
+
+        return redirect(url_for('get_user_posts'))
+
+    return render_template('user_posts/edit_user_post.html', post=post)
+
+
+@app.route('/user_posts/<string:post_id>/delete_post', methods=('POST', ))
+def delete_post(post_id):
+    conn = get_db_connection()
+    conn.execute('delete from posts WHERE post_id = ?',
+                 (post_id))
+    conn.commit()
+    conn.close()
+    flash('Post has been deleted.')
+    return redirect(url_for('get_user_posts'))
 
 
 @app.route('/tag')
@@ -206,7 +336,8 @@ def create_tag():
         description = request.form.get('description')
 
         conn = get_db_connection()
-        conn.execute('INSERT INTO tag (name, description) VALUES (?, ?)', (name, description))
+        conn.execute('INSERT INTO tag (name, description) VALUES (?, ?)',
+                     (name, description))
         conn.commit()
         conn.close()
 
