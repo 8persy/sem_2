@@ -4,10 +4,8 @@ form {
     -webkit-border-radius: 20px; /*Скругляем углы */
     color: #777991; /*Цвет label */
     width: 25%; /*Ширина формы */
-    margin-right: auto; /*Положение формы */
-    margin-left: auto; /*Положение формы */
+    margin: 20px auto;
     text-align: center; /*Центровка текста*/
-
 }
 
 input[type=text], input[type=password] {
@@ -25,7 +23,7 @@ input[type=text], input[type=password] {
 
 button {
     font: 16px Stem-medium, arial, sans-serif; /*Выбираем шрифт кнопки */
-    background-color: #454cee; /*Выбираем цвет фона */
+    background-color: #5f4b8b; /*Выбираем цвет фона */
     -webkit-border-radius: 8px; /*Закругление */
     color: white; /*Выбираем цвет текста*/
     padding: 16px 20px; /*Размер внутренних отступов*/
@@ -36,9 +34,24 @@ button {
 }
 
 button:hover {
-    opacity: 0.9; /*Изменение яркости кнопки при наведении*/
+    opacity: 0.8; /*Изменение яркости кнопки при наведении*/
 }
 
 .container {
     padding: 20px; /*Размер внутренних отступов контейнера*/
+}
+
+.error-message {
+    color: red;
+    border: 1px solid red;
+}
+
+.registration_link {
+    text-decoration: none;
+    color: #5f4b8b;
+}
+
+.registration_link:hover {
+    text-decoration: underline;
+    color: #55018d;
 }

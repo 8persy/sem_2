@@ -1,11 +1,12 @@
-body {
+.page {
     margin: 0;
     font-family: Arial, Helvetica, sans-serif;
+    background-color: rgba(95, 75, 139, 0.13);
 }
 
 .topnav {
     overflow: hidden;
-    background-color: #333;
+    background-color: #5f4b8b;
 }
 
 .topnav a {
@@ -32,6 +33,32 @@ body {
 }
 
 .topnav a.active {
-    background-color: #04AA6D;
+    background-color: #55018d;
     color: white;
+}
+
+.button {
+    margin-top: 10px;
+    background-color: #5f4b8b;
+    border-color: #5f4b8b;
+}
+
+.button:hover {
+    color: black;
+    background-color: white;
+    border-color: white;
+}
+
+.back_link {
+    text-decoration: none;
+    color: #5f4b8b;
+}
+
+.back_link:hover {
+    text-decoration: underline;
+    color: #55018d;
+}
+
+.mb-3 {
+    margin-right: 1%;
 }

@@ -72,6 +72,16 @@ def form_registration():
         cursor_db.execute('INSERT INTO passwords (login, password) VALUES (?, ?)', (login, password))
         cursor_db.execute('INSERT INTO user_profile (login) VALUES (?)', (login,))
 
+        cursor_db.execute('SELECT role FROM user_profile WHERE login = ?', (login,))
+        role = cursor_db.fetchone()[0]
+
+        cursor_db.execute('SELECT user_id FROM user_profile WHERE login = ?', (login,))
+        user_id = cursor_db.fetchone()[0]
+
+        session['username'] = login
+        session['role'] = role
+        session['user_id'] = user_id
+
         conn.commit()
         conn.close()
 
@@ -364,4 +374,4 @@ def delete_tag(name):
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)

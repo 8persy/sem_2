@@ -4,15 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Заголовок по умолчанию{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/index.css') }}"> <!-- Пример подключения стилей -->
     {% block stylesheet %} {% endblock %}
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/index.css') }}"> <!-- Пример подключения стилей -->
 </head>
-<body>
-    <!-- Навигационная панель -->
+<body class="page">
     <nav>
         <div class="topnav">
             <a class="active navigation" href="{{ url_for('index') }}">Главная</a>
-<!--            адрес ссылки формируется динамически с помощью функции url_for.-->
             <a class="navigation" href="{{ url_for('about') }}">О приложении</a>
             <a class="navigation" href="{{ url_for('contact') }}">Контакты</a>
             {% if session.get('role') == 'admin' %}
@@ -28,12 +26,11 @@
                 <a class="login navigation" href="{{ url_for('account') }}">Личный кабинет</a>
                 <a class="login navigation" href="{{ url_for('logout') }}">Выйти</a>
             {% else %}
-                <a class="login navigation" href="{{ url_for('auth') }}">Login</a>
+                <a class="login navigation" href="{{ url_for('auth') }}">Войти</a>
             {% endif %}
         </div>
     </nav>
 
-    <!-- Основной блок страницы -->
     <main>
         <div style="padding-left:16px">
             {% block content %}
