@@ -4,8 +4,7 @@ form {
     -webkit-border-radius: 20px; /*Скругляем углы */
     color: #777991; /*Цвет label */
     width: 25%; /*Ширина формы */
-    margin-right: auto; /*Положение формы */
-    margin-left: auto; /*Положение формы */
+    margin: 20px auto;
     text-align: center; /*Центровка текста*/
 }
 

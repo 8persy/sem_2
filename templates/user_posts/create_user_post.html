@@ -1,11 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Создать пост</title>
-</head>
-<body>
+{% extends 'main/layout.html' %}
+
+{% block title %}
+    <title>create post</title>
+{% endblock %}
+
+{% block content %}
     <h1>Создать пост</h1>
 
     <!-- Flash-сообщения -->
@@ -21,30 +20,39 @@
 
     <!-- Форма для создания поста -->
     <form method="POST" enctype="multipart/form-data">
-        <label for="title">Заголовок:</label><br>
-        <input type="text" id="title" name="title" required><br><br>
+        <div class="mb-3">
+            <label for="title" class="form-label">Заголовок:</label>
+            <input type="text" class="form-control" id="title" name="title" required>
+        </div>
 
-        <label for="content">Содержимое:</label><br>
-        <textarea id="content" name="content" required></textarea><br><br>
+        <div class="mb-3">
+            <label for="content" class="form-label">Содержимое:</label>
+            <textarea id="content" class="form-control" name="content" required></textarea>
+        </div>
 
-        <label for="tag">Тег:</label><br>
-        <input type="text" id="tag" name="tag"><br><br>
+        <div class="mb-3">
+            <label for="tag" class="form-label">Тег:</label>
+            <input type="text" class="form-control" id="tag" name="tag">
+        </div>
 
-<!--        <label for="tag">Тег:</label><br>-->
-<!--        <select id="tag" name="tag">-->
-<!--            <option value="" disabled selected>Выберите тег</option>-->
-<!--            {% for tag in tags %}-->
-<!--                <option value="{{ tag[0] }}">{{ tag[1] }}</option>-->
-<!--            {% endfor %}-->
-<!--        </select><br><br>-->
+        <!--        <label for="tag">Тег:</label><br>-->
+        <!--        <select id="tag" name="tag">-->
+        <!--            <option value="" disabled selected>Выберите тег</option>-->
+        <!--            {% for tag in tags %}-->
+            <!--                <option value="{{ tag[0] }}">{{ tag[1] }}</option>-->
+            <!--            {% endfor %}-->
+        <!--        </select><br><br>-->
 
-        <label for="image">Изображение:</label><br>
-        <input type="file" id="image" name="image"><br><br>
+        <div class="mb-3">
+            <label for="image" class="form-label">Изображение:</label>
+            <input type="file" class="form-control" id="image" name="image">
+        </div>
 
-        <button type="submit">Создать пост</button>
+
+        <button type="submit" class="btn btn-success">Создать пост</button>
+        <a href="{{ url_for('get_user_posts') }}" class="btn btn-secondary">Назад</a>
     </form>
 
     <!-- Ссылка на просмотр постов -->
     <br>
-</body>
-</html>
+{% endblock %}

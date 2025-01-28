@@ -1,5 +1,9 @@
 {% extends 'main/layout.html' %}
 
+{% block title %}
+    <title>edit user</title>
+{% endblock %}
+
 {% block content %}
     <h1>Редактировать пользователя</h1>
     <form method="POST">
@@ -12,6 +16,6 @@
             <input class="form-control" type="text" id="password" name="password" value="{{ user['password'] }}" required>
         </div>
         <button type="submit" class="btn btn-success">Сохранить</button>
-        <a href="{{ url_for('index') }}" class="btn btn-secondary">Назад</a>
+        <a href="{{ url_for('get_users') }}" class="btn btn-secondary">Назад</a>
     </form>
 {% endblock %}
