@@ -1,3 +1,12 @@
+/* imports for posts */
+@import "posts/posts.css";
+@import "posts/__item/posts__item.css";
+@import "posts/__author/posts__author.css";
+@import "posts/__content/posts__content.css";
+@import "posts/__image/posts__image.css";
+@import "posts/__tag/posts__tag.css";
+@import "posts/__title/posts__title.css";
+
 .page {
     margin: 0;
     font-family: Arial, Helvetica, sans-serif;

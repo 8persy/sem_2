@@ -31,17 +31,13 @@
         </div>
 
         <div class="mb-3">
-            <label for="tag" class="form-label">Тег:</label>
-            <input type="text" class="form-control" id="tag" name="tag">
+            <label for="tags">Выберите теги</label>
+            <select id="tags" name="tags" multiple size="5">
+                {% for tag in tags %}
+                    <option value="{{ tag['id'] }}">{{ tag['name'] }}</option>
+                {% endfor %}
+            </select>
         </div>
-
-        <!--        <label for="tag">Тег:</label><br>-->
-        <!--        <select id="tag" name="tag">-->
-        <!--            <option value="" disabled selected>Выберите тег</option>-->
-        <!--            {% for tag in tags %}-->
-            <!--                <option value="{{ tag[0] }}">{{ tag[1] }}</option>-->
-            <!--            {% endfor %}-->
-        <!--        </select><br><br>-->
 
         <div class="mb-3">
             <label for="image" class="form-label">Изображение:</label>

@@ -13,7 +13,7 @@
         </div>
         <div class="mb-3">
             <label for="description" class="form-label">Содержимое</label>
-            <input class="form-control" type="text" id="description" name="description" value="{{ tag['description'] }}" required>
+            <input class="form-control" type="text" id="description" name="description" value="{{ tag['description'] }}">
         </div>
         <button type="submit" class="btn btn-success">Сохранить</button>
         <a href="{{ url_for('tag') }}" class="btn btn-secondary">Назад</a>

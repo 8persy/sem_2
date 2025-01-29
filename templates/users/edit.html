@@ -15,6 +15,10 @@
             <label for="password" class="form-label">Пароль</label>
             <input class="form-control" type="text" id="password" name="password" value="{{ user['password'] }}" required>
         </div>
+        <div class="mb-3">
+            <label for="role" class="form-label">Роль</label>
+            <input class="form-control" type="text" id="role" name="role" value="{{ role['role'] }}" required>
+        </div>
         <button type="submit" class="btn btn-success">Сохранить</button>
         <a href="{{ url_for('get_users') }}" class="btn btn-secondary">Назад</a>
     </form>

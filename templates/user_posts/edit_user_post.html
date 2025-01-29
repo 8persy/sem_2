@@ -1,11 +1,11 @@
 {% extends 'main/layout.html' %}
 
 {% block title %}
-    <title>edit post</title>
+    edit post
 {% endblock %}
 
 {% block content %}
-    <h1>Редактировать пользователя</h1>
+    <h1>Редактировать пост</h1>
     <form method="POST" enctype="multipart/form-data">
         <div class="mb-3">
             <label for="title" class="form-label">Название</label>
@@ -15,10 +15,16 @@
             <label for="content" class="form-label">Содержимое</label>
             <textarea class="form-control" id="content" id='content' name="content" required>{{ post['content'] }}</textarea>
         </div>
-        <div class="mb-3">
-            <label for="tag" class="form-label">Тег</label>
-            <input class="form-control" type="text" id="tag" name="tag" value="{{ post['tag'] }}">
-        </div>
+
+{#        <div class="mb-3">#}
+{#            <label for="tags">Выберите теги</label>#}
+{#            <select id="tags" name="tags" multiple size="5">#}
+{#                {% for tag in tags %}#}
+{#                    <option value="{{ tag['id'] }}">{{ tag['name'] }}</option>#}
+{#                {% endfor %}#}
+{#            </select>#}
+{#        </div>#}
+
         <div class="mb-3">
             <label for="img">Изображение:</label>
             <input type="file" id="img" name="img" class="form-control" value="{{ post['image_path'] }}">

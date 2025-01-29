@@ -1,0 +1,7 @@
+.posts__image {
+    grid-area: image;
+    width: 100%;
+    min-width: 150px;
+    max-width: 230px;
+    align-self: center;
+}

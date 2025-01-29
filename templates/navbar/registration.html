@@ -8,18 +8,24 @@
 
 {% block content %}
     <form method="POST">
-      <div class="container">
-        <label for="Login">
-          <b>Логин</b>
-          <input type="text" placeholder="" name="Login" required>
-        </label>
+        <div class="container">
+            <label for="Login">
+                <b>Логин</b>
+                <input type="text" placeholder="" name="Login" required>
+            </label>
 
-        <label for="Password">
-          <b>Пароль</b>
-          <input type="password" placeholder="" name="Password" required>
-        </label>
+            <label for="Password">
+                <b>Пароль</b>
+                <input type="password" placeholder="" name="Password" required>
+            </label>
 
-        <button type="submit">Зарегистрироваться</button>
-      </div>
+            <button type="submit">Зарегистрироваться</button>
+
+            {% if error %}
+                <div class="error-message">
+                    {{ error }}
+                </div>
+            {% endif %}
+        </div>
     </form>
 {% endblock %}

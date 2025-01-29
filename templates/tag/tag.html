@@ -25,12 +25,14 @@
             <div class="card-body">
                 <h5 class="card-title">{{ tag['name'] }}</h5>
                 <p class="card-text">{{ tag['description'] }}</p>
+
                 {% if session.get('role') == 'manager' %}
                     <a class="btn btn-secondary" href="{{ url_for('edit_tag', name=tag['name']) }}">Редактировать</a>
                     <form action="{{ url_for('delete_tag', name=tag['name']) }}" method="POST" class="d-inline">
                         <button class="btn btn-danger" type="submit">Удалить</button>
                     </form>
                 {% endif %}
+
             </div>
         </div>
     {% endfor %}

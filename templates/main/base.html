@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Заголовок по умолчанию{% endblock %}</title>
     {% block stylesheet %} {% endblock %}
-    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/index.css') }}"> <!-- Пример подключения стилей -->
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/index.css') }}">
 </head>
 <body class="page">
     <nav>
@@ -32,11 +32,8 @@
     </nav>
 
     <main>
-        <div style="padding-left:16px">
             {% block content %}
-            Этот контент будет заменён на уникальный для каждой страницы.
             {% endblock %}
-        </div>
     </main>
 <script src="{{ url_for('static', filename= 'js/main.js') }}"></script>
 </body>

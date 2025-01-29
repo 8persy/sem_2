@@ -1,0 +1,4 @@
+.posts__author {
+    grid-area: author;
+    align-self: center;
+}

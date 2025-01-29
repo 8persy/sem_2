@@ -1,0 +1,5 @@
+.posts__content {
+    justify-self: start;
+    font-size: 18px;
+    grid-area: content;
+}

@@ -68,6 +68,15 @@ cursor = conn.cursor()
 # ''')
 # cursor.execute('''ALTER TABLE user_profile add COLUMN role text default 'user' ''')
 
+cursor.execute('''
+            CREATE TABLE IF NOT EXISTS post_tags (
+                post_id INTEGER NOT NULL,
+                tag_id INTEGER NOT NULL,
+                FOREIGN KEY (post_id) REFERENCES posts (post_id) ON DELETE CASCADE,
+                FOREIGN KEY (tag_id) REFERENCES tags (id) ON DELETE CASCADE,
+                PRIMARY KEY (post_id, tag_id)
+            )
+''')
 # cursor.execute('''
 #                     CREATE TABLE IF NOT EXISTS posts (
 #                     post_id INTEGER PRIMARY key AUTOINCREMENT,

@@ -23,6 +23,13 @@ def get_db_connection():
     return conn
 
 
+def get_all_tags():
+    conn = get_db_connection()
+    tags = conn.execute('select name from tags').fetchall()
+
+    return tags
+
+
 # auth and registration
 @app.route('/authorization', methods=['GET', 'POST'])
 def auth():
@@ -38,10 +45,10 @@ def auth():
         pas = cursor_db.fetchone()
 
         if not pas:
-            return render_template('navbar/authorization.html', error='No such client')
+            return render_template('navbar/authorization.html', error='Несуществующий клиент')
 
         if pas[0] != password:
-            return render_template('navbar/authorization.html', error='Wrong password')
+            return render_template('navbar/authorization.html', error='Неправильный пароль')
 
         cursor_db.execute('SELECT role FROM user_profile WHERE login = ?', (login,))
         role = cursor_db.fetchone()[0]
@@ -52,6 +59,7 @@ def auth():
         session['username'] = login
         session['role'] = role
         session['user_id'] = user_id
+        session.permanent = True
 
         db_lp.close()
 
@@ -69,8 +77,12 @@ def form_registration():
         conn = sqlite3.connect('blog.db')
         cursor_db = conn.cursor()
 
-        cursor_db.execute('INSERT INTO passwords (login, password) VALUES (?, ?)', (login, password))
-        cursor_db.execute('INSERT INTO user_profile (login) VALUES (?)', (login,))
+        try:
+            cursor_db.execute('INSERT INTO passwords (login, password) VALUES (?, ?)', (login, password))
+            cursor_db.execute('INSERT INTO user_profile (login) VALUES (?)', (login,))
+        except Exception as e:
+            print(e)
+            return render_template('navbar/registration.html', error='Такой пользователь уже существует')
 
         cursor_db.execute('SELECT role FROM user_profile WHERE login = ?', (login,))
         role = cursor_db.fetchone()[0]
@@ -81,6 +93,7 @@ def form_registration():
         session['username'] = login
         session['role'] = role
         session['user_id'] = user_id
+        session.permanent = True
 
         conn.commit()
         conn.close()
@@ -104,11 +117,25 @@ def contact():
 @app.route('/')
 def index():
     conn = get_db_connection()
+    # posts_data = conn.execute('''
+    #                 SELECT posts.post_id, title, content, image_path, user_profile.login
+    #                 FROM posts
+    #                 INNER JOIN user_profile ON posts.user_id = user_profile.user_id
+    #             ''').fetchall()
     posts_data = conn.execute('''
-                    SELECT posts.post_id, title, content, image_path, user_profile.login
-                    FROM posts
-                    INNER JOIN user_profile ON posts.user_id = user_profile.user_id
-                ''').fetchall()
+                SELECT
+                    posts.post_id,
+                    posts.title,
+                    posts.content,
+                    posts.image_path,
+                    user_profile.login,
+                    GROUP_CONCAT(tags.name, ', ') AS tags -- Группируем теги через запятую
+                FROM posts
+                INNER JOIN user_profile ON posts.user_id = user_profile.user_id
+                LEFT JOIN post_tags ON posts.post_id = post_tags.post_id
+                LEFT JOIN tags ON post_tags.tag_id = tags.id
+                GROUP BY posts.post_id -- Группируем данные по ID поста
+            ''').fetchall()
     conn.close()
     return render_template('main/index.html', posts=posts_data)
 
@@ -145,9 +172,8 @@ def account():
 
 @app.route('/logout')
 def logout():
-    # Удаляем имя пользователя из сессии (выход из аккаунта)
     session.pop('username', None)
-    session.clear()  # Очистка всех данных сессии
+    session.clear()
     return redirect(url_for('index'))
 
 
@@ -165,10 +191,14 @@ def create_user():
     if request.method == 'POST':
         login = request.form.get('login')
         password = request.form.get('password')
+        role = request.form.get('role')
+
+        if not role:
+            role = "user"
 
         conn = get_db_connection()
         conn.execute('INSERT INTO passwords (password, login) VALUES (?, ?)', (password, login))
-        conn.execute('INSERT INTO user_profile (login) VALUES (?)', (login,))
+        conn.execute('INSERT INTO user_profile (login, role) VALUES (?, ?)', (login, role))
         conn.commit()
         conn.close()
 
@@ -181,21 +211,23 @@ def create_user():
 def edit_user(login):
     conn = get_db_connection()
     user = conn.execute('SELECT * FROM passwords WHERE login = ?', (login,)).fetchone()
+    role = conn.execute('SELECT role FROM user_profile WHERE login = ?', (login,)).fetchone()
 
     if request.method == 'POST':
         new_login = request.form.get('login')
         new_password = request.form.get('password')
+        new_role = request.form.get('role')
 
         conn.execute('UPDATE passwords SET login = ?, password = ? WHERE login = ?',
                      (new_login, new_password, login))
 
-        conn.execute('update user_profile SET login = ? WHERE login =?',
-                     (new_login, login))
+        conn.execute('update user_profile SET login = ?, role = ? WHERE login =?',
+                     (new_login, new_role, login))
         conn.commit()
         conn.close()
         return redirect(url_for('get_users'))
 
-    return render_template('users/edit.html', user=user)
+    return render_template('users/edit.html', user=user, role=role)
 
 
 @app.route('/user/<string:login>/delete_user', methods=('POST',))
@@ -215,11 +247,20 @@ def get_user_posts():
     conn = get_db_connection()
 
     posts_data = conn.execute('''
-    select posts.post_id, title, content, image_path, user_profile.name
-    from posts
-    inner join user_profile on posts.user_id = user_profile.user_id
-    where user_profile.login = ?''',
-                              (session['username'], )).fetchall()
+              SELECT
+                  posts.post_id,
+                  posts.title,
+                  posts.content,
+                  posts.image_path,
+                  user_profile.login,
+                  GROUP_CONCAT(tags.name, ', ') AS tags
+              FROM posts
+              INNER JOIN user_profile ON posts.user_id = user_profile.user_id
+              LEFT JOIN post_tags ON posts.post_id = post_tags.post_id
+              LEFT JOIN tags ON post_tags.tag_id = tags.id
+              WHERE user_profile.login = ?
+              GROUP BY posts.post_id, user_profile.login
+          ''', (session['username'],)).fetchall()
 
     conn.close()
     return render_template('user_posts/user_posts.html', posts=posts_data)
@@ -227,20 +268,12 @@ def get_user_posts():
 
 @app.route('/create_user_post', methods=('GET', 'POST'))
 def create_user_post():
-    # conn = sqlite3.connect('blog.db')
-    # cursor = conn.cursor()
-    #
-    # # Получение списка тегов из таблицы "tags"
-    # tags = cursor.execute('SELECT tag_id, name FROM tags').fetchall()  # Возвращает список кортежей (id, name)
-    #
-    # conn.close()
-
     if request.method == 'POST':
         # Получение данных из формы
         title = request.form.get('title')
         content = request.form.get('content')
         # ID тега из выпадающего списка
-        tag = request.form.get('tag')
+        selected_tags = request.form.getlist('tags')  # Получаем список выбраных тегов
         user_id = session['user_id']
         file = request.files.get('image')  # Получение загружаемого файла
 
@@ -259,12 +292,18 @@ def create_user_post():
             cursor = conn.cursor()
 
             cursor.execute('''
-                    INSERT INTO posts (user_id, title, content, image_path, tag)
-                    VALUES (?, ?, ?, ?, ?)''',
-                           (user_id, title, content, image_path, tag))
+                    INSERT INTO posts (user_id, title, content, image_path)
+                    VALUES (?, ?, ?, ?)''',
+                           (user_id, title, content, image_path))
 
-            # Выполняем SQL-запрос: выбираем все записи из таблицы "теги"
-            # cursor.execute('SELECT * FROM tags').fetchall()
+            post_id = cursor.lastrowid  # Получаем ID созданного поста
+
+            # Добавляем теги для поста в таблицу post_tags
+            for tag_id in selected_tags:
+                cursor.execute('''
+                                            INSERT INTO post_tags (post_id, tag_id)
+                                            VALUES (?, ?)
+                                        ''', (post_id, tag_id))
 
             conn.commit()
             conn.close()
@@ -273,8 +312,12 @@ def create_user_post():
             return redirect(url_for('get_user_posts'))
         except Exception as e:
             flash(f'Ошибка при добавлении поста: {str(e)}', 'danger')
-    return render_template('user_posts/create_user_post.html')
-    # return render_template('user_posts/create_user_post.html', tags=tags)
+
+    conn = get_db_connection()
+    tags = conn.execute('SELECT id, name FROM tags').fetchall()
+    conn.close()
+
+    return render_template('user_posts/create_user_post.html', tags=tags)
 
 
 @app.route('/user_posts/<string:post_id>/edit_post', methods=('GET', 'POST'))
@@ -286,7 +329,6 @@ def edit_post(post_id):
     if request.method == 'POST':
         new_title = request.form.get('title')
         new_content = request.form.get('content')
-        new_tag = request.form.get('tag')
         new_image_path = request.files.get('img')
 
         if new_image_path and allowed_file(new_image_path.filename):
@@ -298,8 +340,8 @@ def edit_post(post_id):
         else:
             new_image_path = post['image_path']
 
-        conn.execute('UPDATE posts SET title = ?, content = ?, tag = ?, image_path = ? WHERE post_id = ?',
-                     (new_title, new_content, new_tag, new_image_path, post_id))
+        conn.execute('UPDATE posts SET title = ?, content = ?, image_path = ? WHERE post_id = ?',
+                     (new_title, new_content, new_image_path, post_id))
         conn.commit()
         conn.close()
 
@@ -312,7 +354,7 @@ def edit_post(post_id):
 def delete_post(post_id):
     conn = get_db_connection()
     conn.execute('delete from posts WHERE post_id = ?',
-                 (post_id))
+                 (post_id, ))
     conn.commit()
     conn.close()
     flash('Post has been deleted.')
@@ -323,7 +365,7 @@ def delete_post(post_id):
 @app.route('/tag')
 def tag():
     conn = get_db_connection()
-    tags = conn.execute('select * from tag').fetchall()
+    tags = conn.execute('select * from tags').fetchall()
     conn.close()
     return render_template('tag/tag.html', tags=tags)
 
@@ -331,14 +373,14 @@ def tag():
 @app.route('/tag/<string:name>/edit_tag', methods=('GET', 'POST'))
 def edit_tag(name):
     conn = get_db_connection()
-    tag = conn.execute('SELECT * FROM tag WHERE name = ?', (name,)).fetchone()
+    tag = conn.execute('SELECT * FROM tags WHERE name = ?', (name,)).fetchone()
 
     if request.method == 'POST':
         new_name = request.form.get('name')
-        new_description = request.form.get('description')
+        # new_description = request.form.get('description')
 
-        conn.execute('UPDATE tag SET name = ?, description = ? WHERE name = ?',
-                     (new_name, new_description, name))
+        conn.execute('UPDATE tags SET name = ? WHERE name = ?',
+                     (new_name, name))
         conn.commit()
         conn.close()
         return redirect(url_for('tag'))
@@ -353,8 +395,7 @@ def create_tag():
         description = request.form.get('description')
 
         conn = get_db_connection()
-        conn.execute('INSERT INTO tag (name, description) VALUES (?, ?)',
-                     (name, description))
+        conn.execute('INSERT INTO tags (name) VALUES (?)', (name,))
         conn.commit()
         conn.close()
 
@@ -366,7 +407,7 @@ def create_tag():
 @app.route('/tag/<string:name>/delete_tag', methods=('POST',))
 def delete_tag(name):
     conn = get_db_connection()
-    conn.execute('DELETE FROM tag WHERE name = ?', (name,))
+    conn.execute('DELETE FROM tags WHERE name = ?', (name,))
     conn.commit()
     conn.close()
     flash('Tag has been deleted.')
