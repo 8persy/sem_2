@@ -129,6 +129,7 @@ def index():
                     posts.content,
                     posts.image_path,
                     user_profile.login,
+                    posts.user_id,
                     GROUP_CONCAT(tags.name, ', ') AS tags -- Группируем теги через запятую
                 FROM posts
                 INNER JOIN user_profile ON posts.user_id = user_profile.user_id
@@ -136,6 +137,8 @@ def index():
                 LEFT JOIN tags ON post_tags.tag_id = tags.id
                 GROUP BY posts.post_id -- Группируем данные по ID поста
             ''').fetchall()
+    for post in posts_data:
+        print(post['post_id'], post['user_id'], post['title'])
     conn.close()
     return render_template('main/index.html', posts=posts_data)
 
@@ -412,6 +415,37 @@ def delete_tag(name):
     conn.close()
     flash('Tag has been deleted.')
     return redirect(url_for('tag'))
+
+
+@app.route('/comments/<post_id><user_id>', methods=('GET', 'POST'))
+def comments(post_id, user_id):
+    conn = get_db_connection()
+
+    if request.method == 'POST':
+        author = session.get('username')
+        text = request.form.get('comment')
+
+        if not author:
+            author = 'Anonymous'
+
+        conn.execute('INSERT INTO comments (author, text, post_id, user_id) VALUES (?, ?, ?, ?)',
+                     (author, text, post_id, user_id))
+
+        conn.commit()
+
+    comments = conn.execute('select * from comments where post_id = ?',
+                            (post_id,)).fetchall()
+
+    return render_template('comments/comments.html', comments=comments)
+
+
+@app.route('/comments/<id>', methods=('POST', ))
+def delete_comment(id):
+    conn = get_db_connection()
+    conn.execute('delete from comments where id = ?', (id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('index'))
 
 
 if __name__ == "__main__":

@@ -17,6 +17,7 @@
         <option value="$MODULE_DIR$/templates/main" />
         <option value="$MODULE_DIR$/templates/tag" />
         <option value="$MODULE_DIR$/templates/user_posts" />
+        <option value="$MODULE_DIR$/templates/comments" />
       </list>
     </option>
   </component>

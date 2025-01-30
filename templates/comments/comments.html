@@ -1,0 +1,35 @@
+{% extends 'main/layout.html' %}
+
+{% block title %}
+    Комментарии
+{% endblock %}
+
+{% block content_layout %}
+
+    <form class="comment-form" method="POST">
+        <div class="mb-3">
+            <label for="comment" class="form-label">Оставьте комментарий:</label>
+            <input type="text" class="form-control" id="comment" name="comment" required>
+            <button type="submit" class="btn btn-success">отправить</button>
+        </div>
+    </form>
+
+    <section class="comments">
+        {% for comment in comments %}
+            <div class="card mb-3 comments__item">
+                <div class="card-body">
+                    <p class="comment__author card-title">Автор: {{ comment['author'] }}</p>
+                    <p class="comments__text card-text">{{ comment['text'] }}</p>
+
+                    {% if session.get('username') == comment['author'] or session.get('role') in ['admin', 'manager'] %}
+                        <form action="{{ url_for('delete_comment', id=comment['id']) }}" method="POST" class="d-inline">
+                            <button class="btn btn-danger" type="submit">Удалить</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+
+        {% endfor %}
+    </section>
+
+{% endblock %}

@@ -9,41 +9,50 @@
 {% block content %}
     <body>
 
-    <a class="btn btn-primary mb-3 button" href="{{ url_for('create_user_post') }}">Создать пост</a>
-    <h1>Привет, {{ session.get('username') }}! Вот твои посты:</h1>
+    <div class="mb-3">
+        <a class="btn btn-primary mb-3 button" href="{{ url_for('create_user_post') }}">Создать пост</a>
+        <h1>Привет, {{ session.get('username') }}! Вот твои посты:</h1>
+    </div>
 
-    {% for post in posts %}
-        <div class="posts__item">
 
-            <h2 class="posts__title">
-                {{ post['title'] }}
-            </h2>
+    <section class="posts">
 
-            <p class="posts__author">
-                (Автор: {{ post['login'] }})
-            </p>
+        {% for post in posts %}
+            <div class="posts__item edit">
 
-            <p class="posts__content">
-                {{ post['content'] }}
-            </p>
+                <h2 class="posts__title">
+                    {{ post['title'] }}
+                </h2>
 
-            {% if post['tags'] %}
-                <p class="posts__tag">
-                    {{ post['tags'] }}
+                <p class="posts__author">
+                    (Автор: {{ post['login'] }})
                 </p>
-            {% endif %}
 
-            {% if post['image_path'] %}
-                <img class="posts__image" src="{{ post['image_path'] }}" alt="Картинка поста" width="300">
-            {% endif %}
-        </div>
+                <p class="posts__content">
+                    {{ post['content'] }}
+                </p>
 
-        <a class="btn btn-secondary" href="{{ url_for('edit_post', post_id=post['post_id']) }}">Редактировать</a>
-        <form action="{{ url_for('delete_post', post_id=post['post_id']) }}" method="POST" class="d-inline">
-            <button class="btn btn-danger" type="submit">Удалить</button>
-        </form>
-    {% endfor %}
+                {% if post['tags'] %}
+                    <p class="posts__tag">
+                        {{ post['tags'] }}
+                    </p>
+                {% endif %}
 
-    <a class="back_link" href="/">Вернуться на главную</a>
+                {% if post['image_path'] %}
+                    <img class="posts__image" src="{{ post['image_path'] }}" alt="Картинка поста" width="300">
+                {% endif %}
+
+                <a class="btn btn-secondary posts__edit"
+                   href="{{ url_for('edit_post', post_id=post['post_id']) }}">Редактировать</a>
+
+                <form action="{{ url_for('delete_post', post_id=post['post_id']) }}" method="POST"
+                      class="d-inline posts__delete">
+                    <button class="btn btn-danger" type="submit">Удалить</button>
+                </form>
+            </div>
+
+        {% endfor %}
+    </section>
+
     </body>
 {% endblock %}

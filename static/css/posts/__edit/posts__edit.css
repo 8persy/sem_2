@@ -1,0 +1,5 @@
+.posts__edit {
+    grid-area: edit;
+    align-self: start;
+    justify-self: center;
+}

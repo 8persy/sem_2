@@ -6,6 +6,9 @@
 @import "posts/__image/posts__image.css";
 @import "posts/__tag/posts__tag.css";
 @import "posts/__title/posts__title.css";
+@import "posts/__edit/posts__edit.css";
+@import "posts/__delete/posts__delete.css";
+@import "posts/__comments/posts__comments.css";
 
 .page {
     margin: 0;
@@ -69,5 +72,6 @@
 }
 
 .mb-3 {
-    margin-right: 1%;
+    margin: 1%;
 }
+

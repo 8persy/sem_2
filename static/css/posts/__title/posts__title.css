@@ -1,3 +1,5 @@
 .posts__title {
     grid-area: title;
+    align-self: center;
+    justify-self: center;
 }

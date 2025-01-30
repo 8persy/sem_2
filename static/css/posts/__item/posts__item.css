@@ -1,13 +1,22 @@
 .posts__item {
+    height: auto;
     min-width: 47%;
     max-width: 75%;
     padding: 0.7%;
     display: grid;
     grid-template-areas:
             "title author tag"
-            "content content image";
+            "content content image"
+            "comments . .";
     align-content: center;
     justify-items: center;
     background-color: rgba(95, 75, 139, 0.19);
     border-radius: 4%;
+}
+
+.edit {
+    grid-template-areas:
+        "title author tag"
+        "content content image"
+        "edit delete .";
 }

@@ -1,5 +1,5 @@
-.posts__author {
-    grid-area: author;
+.posts__delete {
+    grid-area: delete;
     align-self: center;
     justify-self: center;
 }
