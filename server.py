@@ -117,11 +117,7 @@ def contact():
 @app.route('/')
 def index():
     conn = get_db_connection()
-    # posts_data = conn.execute('''
-    #                 SELECT posts.post_id, title, content, image_path, user_profile.login
-    #                 FROM posts
-    #                 INNER JOIN user_profile ON posts.user_id = user_profile.user_id
-    #             ''').fetchall()
+
     posts_data = conn.execute('''
                 SELECT
                     posts.post_id,
@@ -137,8 +133,7 @@ def index():
                 LEFT JOIN tags ON post_tags.tag_id = tags.id
                 GROUP BY posts.post_id -- Группируем данные по ID поста
             ''').fetchall()
-    for post in posts_data:
-        print(post['post_id'], post['user_id'], post['title'])
+
     conn.close()
     return render_template('main/index.html', posts=posts_data)
 
@@ -240,7 +235,6 @@ def delete_user(login):
     conn.execute('DELETE FROM user_profile WHERE login = ?', (login,))
     conn.commit()
     conn.close()
-    flash('User has been deleted.')
     return redirect(url_for('get_users'))
 
 
@@ -311,7 +305,6 @@ def create_user_post():
             conn.commit()
             conn.close()
 
-            flash('Пост успешно добавлен!', 'success')
             return redirect(url_for('get_user_posts'))
         except Exception as e:
             flash(f'Ошибка при добавлении поста: {str(e)}', 'danger')
@@ -353,15 +346,19 @@ def edit_post(post_id):
     return render_template('user_posts/edit_user_post.html', post=post)
 
 
-@app.route('/user_posts/<string:post_id>/delete_post', methods=('POST', ))
-def delete_post(post_id):
+@app.route('/user_posts/<string:post_id>/<string:place>/delete_post', methods=('POST', ))
+def delete_post(post_id, place):
+    print(post_id, '\n', place)
     conn = get_db_connection()
     conn.execute('delete from posts WHERE post_id = ?',
                  (post_id, ))
     conn.commit()
     conn.close()
-    flash('Post has been deleted.')
-    return redirect(url_for('get_user_posts'))
+
+    if place == 'posts':
+        return redirect(url_for('get_user_posts'))
+    else:
+        return redirect(url_for('index'))
 
 
 # tags
@@ -413,11 +410,10 @@ def delete_tag(name):
     conn.execute('DELETE FROM tags WHERE name = ?', (name,))
     conn.commit()
     conn.close()
-    flash('Tag has been deleted.')
     return redirect(url_for('tag'))
 
 
-@app.route('/comments/<post_id><user_id>', methods=('GET', 'POST'))
+@app.route('/comments/<post_id>/<user_id>', methods=('GET', 'POST'))
 def comments(post_id, user_id):
     conn = get_db_connection()
 

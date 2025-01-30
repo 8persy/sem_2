@@ -7,11 +7,12 @@
     grid-template-areas:
             "title author tag"
             "content content image"
-            "comments . .";
+            "comments delete .";
     align-content: center;
     justify-items: center;
     background-color: rgba(95, 75, 139, 0.19);
     border-radius: 4%;
+    gap: 5px;
 }
 
 .edit {
